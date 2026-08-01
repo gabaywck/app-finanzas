@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mis Finanzas</title>
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 <div class="app">
@@ -26,6 +26,11 @@
       <span id="currentMonthLabel"></span>
       <button id="nextMonth" class="icon-btn" aria-label="Mes siguiente">›</button>
     </div>
+
+    <section class="hero-patrimonio">
+      <span class="hero-label">Patrimonio total</span>
+      <span class="hero-value" id="heroPatrimonioMov">0,00 €</span>
+    </section>
 
     <section class="summary">
       <div class="summary-card income">
@@ -165,6 +170,11 @@
       </div>
     </section>
 
+    <section class="hero-patrimonio">
+      <span class="hero-label">Patrimonio total</span>
+      <span class="hero-value" id="heroPatrimonioInforme">0,00 €</span>
+    </section>
+
     <section class="summary">
       <div class="summary-card income">
         <span class="label">Ingresos</span>
@@ -188,9 +198,9 @@
 
 </div>
 
-<script src="shared.js?v=3"></script>
-<script src="app.js?v=3"></script>
-<script src="patrimonio.js?v=3"></script>
-<script src="informe.js?v=3"></script>
+<script src="shared.js?v=4"></script>
+<script src="app.js?v=4"></script>
+<script src="patrimonio.js?v=4"></script>
+<script src="informe.js?v=4"></script>
 </body>
 </html>

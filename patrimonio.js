@@ -234,7 +234,7 @@ function renderStocks() {
   renderTotalPatrimonio();
 }
 
-function renderTotalPatrimonio() {
+function getPatrimonioTotal() {
   const bankTotal = bankAccounts.reduce((s, a) => s + a.balance, 0);
   const cryptoTotal = cryptoHoldings.reduce((s, h) => {
     const price = priceCache.crypto[h.coinId];
@@ -245,8 +245,17 @@ function renderTotalPatrimonio() {
     return s + (price !== undefined ? price * h.quantity : 0);
   }, 0);
   const stockTotalEur = priceCache.usdToEur ? stockTotalUsd * priceCache.usdToEur : 0;
-  const total = bankTotal + cryptoTotal + stockTotalEur;
+  return bankTotal + cryptoTotal + stockTotalEur;
+}
+
+function renderTotalPatrimonio() {
+  const total = getPatrimonioTotal();
   patrimonioTotalEl.textContent = formatCurrency(total, '€');
+
+  const heroMov = document.getElementById('heroPatrimonioMov');
+  const heroInforme = document.getElementById('heroPatrimonioInforme');
+  if (heroMov) heroMov.textContent = formatCurrency(total, '€');
+  if (heroInforme) heroInforme.textContent = formatCurrency(total, '€');
 
   if (priceCache.updatedAt) {
     const d = new Date(priceCache.updatedAt);

@@ -96,6 +96,31 @@ body {
 
 .icon-btn:hover { background: var(--border); }
 
+.hero-patrimonio {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.hero-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.hero-value {
+  display: block;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
 .summary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
