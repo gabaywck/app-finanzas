@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mis Finanzas</title>
-<link rel="stylesheet" href="style.css?v=2">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 <div class="app">
@@ -16,6 +16,7 @@
   <nav class="main-tabs">
     <button class="main-tab-btn active" data-panel="panel-movimientos">Movimientos</button>
     <button class="main-tab-btn" data-panel="panel-patrimonio">Patrimonio</button>
+    <button class="main-tab-btn" data-panel="panel-informe">Informe</button>
   </nav>
 
   <div id="panel-movimientos" class="tab-panel active">
@@ -147,10 +148,49 @@
 
   </div>
 
+  <div id="panel-informe" class="tab-panel">
+
+    <section class="report-filters">
+      <div class="date-presets">
+        <button class="preset-btn active" data-preset="month">Este mes</button>
+        <button class="preset-btn" data-preset="last30">Últimos 30 días</button>
+        <button class="preset-btn" data-preset="last90">Últimos 90 días</button>
+        <button class="preset-btn" data-preset="year">Este año</button>
+        <button class="preset-btn" data-preset="all">Todo</button>
+      </div>
+      <div class="date-custom">
+        <input type="date" id="reportFrom" aria-label="Desde">
+        <span class="date-sep">–</span>
+        <input type="date" id="reportTo" aria-label="Hasta">
+      </div>
+    </section>
+
+    <section class="summary">
+      <div class="summary-card income">
+        <span class="label">Ingresos</span>
+        <span class="value" id="reportIncome">0,00 €</span>
+      </div>
+      <div class="summary-card expense">
+        <span class="label">Gastos</span>
+        <span class="value" id="reportExpense">0,00 €</span>
+      </div>
+      <div class="summary-card balance">
+        <span class="label">Balance</span>
+        <span class="value" id="reportBalance">0,00 €</span>
+      </div>
+    </section>
+
+    <div id="donutExpense"></div>
+    <div id="donutIncome"></div>
+    <div id="donutPatrimonio"></div>
+
+  </div>
+
 </div>
 
-<script src="shared.js?v=2"></script>
-<script src="app.js?v=2"></script>
-<script src="patrimonio.js?v=2"></script>
+<script src="shared.js?v=3"></script>
+<script src="app.js?v=3"></script>
+<script src="patrimonio.js?v=3"></script>
+<script src="informe.js?v=3"></script>
 </body>
 </html>

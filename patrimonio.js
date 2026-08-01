@@ -268,6 +268,7 @@ async function fetchCryptoPrices() {
     priceCache.updatedAt = new Date().toISOString();
     savePriceCache();
     renderCrypto();
+    document.dispatchEvent(new CustomEvent('prices-updated'));
   } catch (err) {
     cryptoErrorEl.textContent = 'No se pudieron actualizar los precios de crypto ahora mismo.';
   }
@@ -297,6 +298,7 @@ async function fetchStockPrices() {
     priceCache.updatedAt = new Date().toISOString();
     savePriceCache();
     renderStocks();
+    document.dispatchEvent(new CustomEvent('prices-updated'));
   } catch (err) {
     stockErrorEl.textContent = 'No se pudieron actualizar los precios de stocks ahora mismo (revisa tu API key).';
   }
