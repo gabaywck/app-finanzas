@@ -34,6 +34,7 @@ const CRYPTO_OPTIONS = [
   { id: 'vechain', symbol: 'VET', name: 'VeChain' },
   { id: 'algorand', symbol: 'ALGO', name: 'Algorand' },
   { id: 'the-graph', symbol: 'GRT', name: 'The Graph' },
+  { id: 'kucoin-shares', symbol: 'KCS', name: 'KuCoin Token' },
 ];
 
 let cryptoHoldings = loadJSON(CRYPTO_KEY, []);
