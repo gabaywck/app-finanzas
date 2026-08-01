@@ -214,6 +214,17 @@ body {
 
 .submit-btn:hover { filter: brightness(1.1); }
 
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.form-row select:disabled {
+  color: var(--text-dim);
+  cursor: not-allowed;
+}
+
 .filters {
   display: flex;
   gap: 10px;

@@ -1,4 +1,3 @@
-const BANK_KEY = 'finanzas.bankAccounts';
 const CRYPTO_KEY = 'finanzas.crypto';
 const STOCK_KEY = 'finanzas.stocks';
 const FINNHUB_KEY_STORAGE = 'finanzas.finnhubKey';
@@ -37,7 +36,6 @@ const CRYPTO_OPTIONS = [
   { id: 'the-graph', symbol: 'GRT', name: 'The Graph' },
 ];
 
-let bankAccounts = loadJSON(BANK_KEY, []);
 let cryptoHoldings = loadJSON(CRYPTO_KEY, []);
 let stockHoldings = loadJSON(STOCK_KEY, []);
 let priceCache = loadJSON(PRICE_CACHE_KEY, { crypto: {}, stocks: {}, usdToEur: null, updatedAt: null });
@@ -63,19 +61,6 @@ const patrimonioTotalEl = document.getElementById('patrimonioTotal');
 const patrimonioUpdatedEl = document.getElementById('patrimonioUpdated');
 const refreshPricesBtn = document.getElementById('refreshPrices');
 
-function loadJSON(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function saveJSON(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
 function savePriceCache() {
   saveJSON(PRICE_CACHE_KEY, priceCache);
 }
@@ -95,10 +80,11 @@ bankForm.addEventListener('submit', e => {
     name: document.getElementById('bankName').value.trim(),
     balance: parseFloat(document.getElementById('bankBalance').value),
   });
-  saveJSON(BANK_KEY, bankAccounts);
+  saveBankAccounts();
   bankForm.reset();
-  renderBanks();
 });
+
+document.addEventListener('bank-accounts-changed', renderBanks);
 
 cryptoForm.addEventListener('submit', e => {
   e.preventDefault();
@@ -174,8 +160,7 @@ function renderBanks() {
   bankList.querySelectorAll('.tx-delete').forEach(btn => {
     btn.addEventListener('click', () => {
       bankAccounts = bankAccounts.filter(a => a.id !== btn.dataset.id);
-      saveJSON(BANK_KEY, bankAccounts);
-      renderBanks();
+      saveBankAccounts();
     });
   });
   const total = bankAccounts.reduce((s, a) => s + a.balance, 0);

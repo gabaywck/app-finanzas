@@ -39,6 +39,8 @@ const form = document.getElementById('txForm');
 const amountInput = document.getElementById('amount');
 const descriptionInput = document.getElementById('description');
 const categorySelect = document.getElementById('category');
+const accountSelect = document.getElementById('account');
+const submitBtn = form.querySelector('.submit-btn');
 const dateInput = document.getElementById('date');
 const filterCategory = document.getElementById('filterCategory');
 const filterType = document.getElementById('filterType');
@@ -68,18 +70,23 @@ document.getElementById('nextMonth').addEventListener('click', () => {
 filterCategory.addEventListener('change', render);
 filterType.addEventListener('change', render);
 
+document.addEventListener('bank-accounts-changed', populateAccountSelect);
+
 form.addEventListener('submit', e => {
   e.preventDefault();
+  if (!accountSelect.value) return;
   const tx = {
     id: crypto.randomUUID(),
     type: currentType,
     amount: parseFloat(amountInput.value),
     description: descriptionInput.value.trim(),
     category: categorySelect.value,
+    accountId: accountSelect.value,
     date: dateInput.value,
   };
   transactions.push(tx);
   saveTransactions();
+  adjustBankBalance(tx.accountId, tx.type === 'income' ? tx.amount : -tx.amount);
   form.reset();
   dateInput.value = todayISO();
   populateCategorySelect();
@@ -111,6 +118,29 @@ function populateCategorySelect() {
     opt.textContent = `${cat.icon} ${cat.label}`;
     categorySelect.appendChild(opt);
   });
+}
+
+function populateAccountSelect() {
+  const prevValue = accountSelect.value;
+  accountSelect.innerHTML = '';
+  if (bankAccounts.length === 0) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'Añade una cuenta bancaria primero (pestaña Patrimonio)';
+    accountSelect.appendChild(opt);
+    accountSelect.disabled = true;
+    submitBtn.disabled = true;
+    return;
+  }
+  accountSelect.disabled = false;
+  submitBtn.disabled = false;
+  bankAccounts.forEach(acc => {
+    const opt = document.createElement('option');
+    opt.value = acc.id;
+    opt.textContent = acc.name;
+    accountSelect.appendChild(opt);
+  });
+  if (bankAccounts.some(a => a.id === prevValue)) accountSelect.value = prevValue;
 }
 
 function populateFilterCategories() {
@@ -169,13 +199,14 @@ function render() {
 
   filtered.forEach(tx => {
     const cat = findCategory(tx.category);
+    const accName = getAccountName(tx.accountId);
     const li = document.createElement('li');
     li.className = `tx-item ${tx.type}`;
     li.innerHTML = `
       <div class="tx-icon">${cat.icon}</div>
       <div class="tx-info">
         <div class="tx-desc">${escapeHtml(tx.description)}</div>
-        <div class="tx-meta">${cat.label} · ${formatDate(tx.date)}</div>
+        <div class="tx-meta">${cat.label} · ${formatDate(tx.date)}${accName ? ' · ' + escapeHtml(accName) : ''}</div>
       </div>
       <div class="tx-amount">${tx.type === 'income' ? '+' : '-'}${formatMoney(tx.amount)}</div>
       <button class="tx-delete" data-id="${tx.id}" aria-label="Eliminar">✕</button>
@@ -185,20 +216,19 @@ function render() {
 
   txList.querySelectorAll('.tx-delete').forEach(btn => {
     btn.addEventListener('click', () => {
+      const tx = transactions.find(t => t.id === btn.dataset.id);
       transactions = transactions.filter(t => t.id !== btn.dataset.id);
       saveTransactions();
+      if (tx && tx.accountId) {
+        adjustBankBalance(tx.accountId, tx.type === 'income' ? -tx.amount : tx.amount);
+      }
       render();
     });
   });
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
 populateCategorySelect();
+populateAccountSelect();
 populateFilterCategories();
 dateInput.value = todayISO();
 render();
