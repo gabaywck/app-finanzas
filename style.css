@@ -730,11 +730,6 @@ body {
   color: var(--text-dim);
 }
 
-.goal-pct-row.compact {
-  justify-content: flex-start;
-  gap: 8px;
-}
-
 .goal-remaining {
   color: var(--text-dim);
 }

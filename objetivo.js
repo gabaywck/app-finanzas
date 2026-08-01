@@ -139,7 +139,6 @@ function buildGoalCard(goal, pace, today, compact = false) {
   pctLabel.textContent = `${pct.toFixed(1)}%`;
   pctRow.appendChild(pctLabel);
   if (compact) {
-    pctRow.classList.add('compact');
     if (!achieved) {
       const remainingLabel = document.createElement('span');
       remainingLabel.className = 'goal-remaining';
