@@ -1,0 +1,323 @@
+const BANK_KEY = 'finanzas.bankAccounts';
+const CRYPTO_KEY = 'finanzas.crypto';
+const STOCK_KEY = 'finanzas.stocks';
+const FINNHUB_KEY_STORAGE = 'finanzas.finnhubKey';
+const PRICE_CACHE_KEY = 'finanzas.priceCache';
+
+const CRYPTO_OPTIONS = [
+  { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin' },
+  { id: 'ethereum', symbol: 'ETH', name: 'Ethereum' },
+  { id: 'tether', symbol: 'USDT', name: 'Tether' },
+  { id: 'binancecoin', symbol: 'BNB', name: 'BNB' },
+  { id: 'solana', symbol: 'SOL', name: 'Solana' },
+  { id: 'ripple', symbol: 'XRP', name: 'XRP' },
+  { id: 'usd-coin', symbol: 'USDC', name: 'USD Coin' },
+  { id: 'cardano', symbol: 'ADA', name: 'Cardano' },
+  { id: 'dogecoin', symbol: 'DOGE', name: 'Dogecoin' },
+  { id: 'avalanche-2', symbol: 'AVAX', name: 'Avalanche' },
+  { id: 'chainlink', symbol: 'LINK', name: 'Chainlink' },
+  { id: 'polkadot', symbol: 'DOT', name: 'Polkadot' },
+  { id: 'matic-network', symbol: 'MATIC', name: 'Polygon' },
+  { id: 'litecoin', symbol: 'LTC', name: 'Litecoin' },
+  { id: 'shiba-inu', symbol: 'SHIB', name: 'Shiba Inu' },
+  { id: 'tron', symbol: 'TRX', name: 'Tron' },
+  { id: 'uniswap', symbol: 'UNI', name: 'Uniswap' },
+  { id: 'stellar', symbol: 'XLM', name: 'Stellar' },
+  { id: 'monero', symbol: 'XMR', name: 'Monero' },
+  { id: 'cosmos', symbol: 'ATOM', name: 'Cosmos' },
+  { id: 'near', symbol: 'NEAR', name: 'NEAR Protocol' },
+  { id: 'aptos', symbol: 'APT', name: 'Aptos' },
+  { id: 'arbitrum', symbol: 'ARB', name: 'Arbitrum' },
+  { id: 'optimism', symbol: 'OP', name: 'Optimism' },
+  { id: 'filecoin', symbol: 'FIL', name: 'Filecoin' },
+  { id: 'internet-computer', symbol: 'ICP', name: 'Internet Computer' },
+  { id: 'hedera-hashgraph', symbol: 'HBAR', name: 'Hedera' },
+  { id: 'vechain', symbol: 'VET', name: 'VeChain' },
+  { id: 'algorand', symbol: 'ALGO', name: 'Algorand' },
+  { id: 'the-graph', symbol: 'GRT', name: 'The Graph' },
+];
+
+let bankAccounts = loadJSON(BANK_KEY, []);
+let cryptoHoldings = loadJSON(CRYPTO_KEY, []);
+let stockHoldings = loadJSON(STOCK_KEY, []);
+let priceCache = loadJSON(PRICE_CACHE_KEY, { crypto: {}, stocks: {}, usdToEur: null, updatedAt: null });
+
+const bankList = document.getElementById('bankList');
+const bankForm = document.getElementById('bankForm');
+const bankTotalEl = document.getElementById('bankTotal');
+
+const cryptoList = document.getElementById('cryptoList');
+const cryptoForm = document.getElementById('cryptoForm');
+const cryptoCoinSelect = document.getElementById('cryptoCoin');
+const cryptoTotalEl = document.getElementById('cryptoTotal');
+const cryptoErrorEl = document.getElementById('cryptoError');
+
+const stockList = document.getElementById('stockList');
+const stockForm = document.getElementById('stockForm');
+const stockTotalEl = document.getElementById('stockTotal');
+const stockErrorEl = document.getElementById('stockError');
+const finnhubKeyInput = document.getElementById('finnhubKeyInput');
+const saveFinnhubKeyBtn = document.getElementById('saveFinnhubKey');
+
+const patrimonioTotalEl = document.getElementById('patrimonioTotal');
+const patrimonioUpdatedEl = document.getElementById('patrimonioUpdated');
+const refreshPricesBtn = document.getElementById('refreshPrices');
+
+function loadJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveJSON(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function savePriceCache() {
+  saveJSON(PRICE_CACHE_KEY, priceCache);
+}
+
+populateCryptoSelect();
+finnhubKeyInput.value = localStorage.getItem(FINNHUB_KEY_STORAGE) || '';
+
+saveFinnhubKeyBtn.addEventListener('click', () => {
+  localStorage.setItem(FINNHUB_KEY_STORAGE, finnhubKeyInput.value.trim());
+  fetchStockPrices();
+});
+
+bankForm.addEventListener('submit', e => {
+  e.preventDefault();
+  bankAccounts.push({
+    id: crypto.randomUUID(),
+    name: document.getElementById('bankName').value.trim(),
+    balance: parseFloat(document.getElementById('bankBalance').value),
+  });
+  saveJSON(BANK_KEY, bankAccounts);
+  bankForm.reset();
+  renderBanks();
+});
+
+cryptoForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const opt = CRYPTO_OPTIONS.find(c => c.id === cryptoCoinSelect.value);
+  cryptoHoldings.push({
+    id: crypto.randomUUID(),
+    coinId: opt.id,
+    symbol: opt.symbol,
+    name: opt.name,
+    quantity: parseFloat(document.getElementById('cryptoQty').value),
+  });
+  saveJSON(CRYPTO_KEY, cryptoHoldings);
+  cryptoForm.reset();
+  renderCrypto();
+  fetchCryptoPrices();
+});
+
+stockForm.addEventListener('submit', e => {
+  e.preventDefault();
+  stockHoldings.push({
+    id: crypto.randomUUID(),
+    ticker: document.getElementById('stockTicker').value.trim().toUpperCase(),
+    quantity: parseFloat(document.getElementById('stockQty').value),
+  });
+  saveJSON(STOCK_KEY, stockHoldings);
+  stockForm.reset();
+  renderStocks();
+  fetchStockPrices();
+});
+
+refreshPricesBtn.addEventListener('click', () => {
+  fetchCryptoPrices();
+  fetchStockPrices();
+});
+
+document.addEventListener('panel-shown', e => {
+  if (e.detail.panel === 'panel-patrimonio') {
+    fetchCryptoPrices();
+    fetchStockPrices();
+  }
+});
+
+function populateCryptoSelect() {
+  cryptoCoinSelect.innerHTML = '';
+  CRYPTO_OPTIONS.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = `${c.symbol} · ${c.name}`;
+    cryptoCoinSelect.appendChild(opt);
+  });
+}
+
+function formatCurrency(n, symbol) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + symbol;
+}
+
+function renderBanks() {
+  bankList.innerHTML = '';
+  bankAccounts.forEach(acc => {
+    const li = document.createElement('li');
+    li.className = 'asset-item';
+    li.innerHTML = `
+      <div class="asset-icon">🏦</div>
+      <div class="asset-info">
+        <div class="asset-name">${escapeHtml(acc.name)}</div>
+      </div>
+      <div class="asset-value">${formatCurrency(acc.balance, '€')}</div>
+      <button class="tx-delete" data-id="${acc.id}" aria-label="Eliminar">✕</button>
+    `;
+    bankList.appendChild(li);
+  });
+  bankList.querySelectorAll('.tx-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      bankAccounts = bankAccounts.filter(a => a.id !== btn.dataset.id);
+      saveJSON(BANK_KEY, bankAccounts);
+      renderBanks();
+    });
+  });
+  const total = bankAccounts.reduce((s, a) => s + a.balance, 0);
+  bankTotalEl.textContent = formatCurrency(total, '€');
+  renderTotalPatrimonio();
+}
+
+function renderCrypto() {
+  cryptoList.innerHTML = '';
+  cryptoHoldings.forEach(h => {
+    const priceEur = priceCache.crypto[h.coinId];
+    const value = priceEur !== undefined ? priceEur * h.quantity : null;
+    const li = document.createElement('li');
+    li.className = 'asset-item';
+    li.innerHTML = `
+      <div class="asset-icon">🪙</div>
+      <div class="asset-info">
+        <div class="asset-name">${h.symbol} <span class="asset-qty">${h.quantity}</span></div>
+        <div class="asset-meta">${priceEur !== undefined ? formatCurrency(priceEur, '€') + ' / unidad' : 'precio no disponible'}</div>
+      </div>
+      <div class="asset-value">${formatCurrency(value, '€')}</div>
+      <button class="tx-delete" data-id="${h.id}" aria-label="Eliminar">✕</button>
+    `;
+    cryptoList.appendChild(li);
+  });
+  cryptoList.querySelectorAll('.tx-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      cryptoHoldings = cryptoHoldings.filter(h => h.id !== btn.dataset.id);
+      saveJSON(CRYPTO_KEY, cryptoHoldings);
+      renderCrypto();
+    });
+  });
+  const total = cryptoHoldings.reduce((s, h) => {
+    const price = priceCache.crypto[h.coinId];
+    return s + (price !== undefined ? price * h.quantity : 0);
+  }, 0);
+  cryptoTotalEl.textContent = formatCurrency(total, '€');
+  renderTotalPatrimonio();
+}
+
+function renderStocks() {
+  stockList.innerHTML = '';
+  stockHoldings.forEach(h => {
+    const priceUsd = priceCache.stocks[h.ticker];
+    const value = priceUsd !== undefined ? priceUsd * h.quantity : null;
+    const li = document.createElement('li');
+    li.className = 'asset-item';
+    li.innerHTML = `
+      <div class="asset-icon">📈</div>
+      <div class="asset-info">
+        <div class="asset-name">${h.ticker} <span class="asset-qty">${h.quantity}</span></div>
+        <div class="asset-meta">${priceUsd !== undefined ? formatCurrency(priceUsd, '$') + ' / unidad' : 'precio no disponible'}</div>
+      </div>
+      <div class="asset-value">${formatCurrency(value, '$')}</div>
+      <button class="tx-delete" data-id="${h.id}" aria-label="Eliminar">✕</button>
+    `;
+    stockList.appendChild(li);
+  });
+  stockList.querySelectorAll('.tx-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      stockHoldings = stockHoldings.filter(h => h.id !== btn.dataset.id);
+      saveJSON(STOCK_KEY, stockHoldings);
+      renderStocks();
+    });
+  });
+  const totalUsd = stockHoldings.reduce((s, h) => {
+    const price = priceCache.stocks[h.ticker];
+    return s + (price !== undefined ? price * h.quantity : 0);
+  }, 0);
+  stockTotalEl.textContent = formatCurrency(totalUsd, '$');
+  renderTotalPatrimonio();
+}
+
+function renderTotalPatrimonio() {
+  const bankTotal = bankAccounts.reduce((s, a) => s + a.balance, 0);
+  const cryptoTotal = cryptoHoldings.reduce((s, h) => {
+    const price = priceCache.crypto[h.coinId];
+    return s + (price !== undefined ? price * h.quantity : 0);
+  }, 0);
+  const stockTotalUsd = stockHoldings.reduce((s, h) => {
+    const price = priceCache.stocks[h.ticker];
+    return s + (price !== undefined ? price * h.quantity : 0);
+  }, 0);
+  const stockTotalEur = priceCache.usdToEur ? stockTotalUsd * priceCache.usdToEur : 0;
+  const total = bankTotal + cryptoTotal + stockTotalEur;
+  patrimonioTotalEl.textContent = formatCurrency(total, '€');
+
+  if (priceCache.updatedAt) {
+    const d = new Date(priceCache.updatedAt);
+    patrimonioUpdatedEl.textContent = 'Actualizado ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  }
+}
+
+async function fetchCryptoPrices() {
+  if (cryptoHoldings.length === 0) return;
+  const ids = [...new Set(cryptoHoldings.map(h => h.coinId))].join(',');
+  cryptoErrorEl.textContent = '';
+  try {
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur`);
+    if (!res.ok) throw new Error('Respuesta no válida de CoinGecko');
+    const data = await res.json();
+    Object.keys(data).forEach(id => {
+      priceCache.crypto[id] = data[id].eur;
+    });
+    priceCache.updatedAt = new Date().toISOString();
+    savePriceCache();
+    renderCrypto();
+  } catch (err) {
+    cryptoErrorEl.textContent = 'No se pudieron actualizar los precios de crypto ahora mismo.';
+  }
+}
+
+async function fetchStockPrices() {
+  if (stockHoldings.length === 0) return;
+  const apiKey = localStorage.getItem(FINNHUB_KEY_STORAGE);
+  stockErrorEl.textContent = '';
+  if (!apiKey) {
+    stockErrorEl.textContent = 'Añade tu API key de Finnhub arriba para ver precios en vivo.';
+    return;
+  }
+  try {
+    const tickers = [...new Set(stockHoldings.map(h => h.ticker))];
+    for (const ticker of tickers) {
+      const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(ticker)}&token=${apiKey}`);
+      if (!res.ok) throw new Error('Respuesta no válida de Finnhub');
+      const data = await res.json();
+      if (data.c) priceCache.stocks[ticker] = data.c;
+    }
+    const fx = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR');
+    if (fx.ok) {
+      const fxData = await fx.json();
+      priceCache.usdToEur = fxData.rates.EUR;
+    }
+    priceCache.updatedAt = new Date().toISOString();
+    savePriceCache();
+    renderStocks();
+  } catch (err) {
+    stockErrorEl.textContent = 'No se pudieron actualizar los precios de stocks ahora mismo (revisa tu API key).';
+  }
+}
+
+renderBanks();
+renderCrypto();
+renderStocks();
+renderTotalPatrimonio();

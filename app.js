@@ -1,3 +1,13 @@
+document.querySelectorAll('.main-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.main-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.panel).classList.add('active');
+    document.dispatchEvent(new CustomEvent('panel-shown', { detail: { panel: btn.dataset.panel } }));
+  });
+});
+
 const STORAGE_KEY = 'finanzas.transactions';
 
 const CATEGORIES = {
