@@ -4,10 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mis Finanzas</title>
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
-<div class="app">
+
+<div id="lockScreen" class="lock-screen">
+  <div class="lock-box">
+    <div class="lock-icon">🔒</div>
+    <h2 id="lockTitle">Introduce tu PIN</h2>
+    <p id="lockSubtitle" class="lock-subtitle"></p>
+    <input type="password" id="pinInput" inputmode="numeric" autocomplete="off" class="pin-input" maxlength="24">
+    <button id="pinSubmit" class="submit-btn">Desbloquear</button>
+    <p id="lockError" class="lock-error"></p>
+  </div>
+</div>
+
+<div class="app" style="display:none">
 
   <header class="topbar">
     <h1>Mis Finanzas</h1>
@@ -223,10 +235,6 @@
 
 </div>
 
-<script src="shared.js?v=10"></script>
-<script src="app.js?v=10"></script>
-<script src="patrimonio.js?v=10"></script>
-<script src="informe.js?v=10"></script>
-<script src="objetivo.js?v=10"></script>
+<script src="lock.js?v=11"></script>
 </body>
 </html>

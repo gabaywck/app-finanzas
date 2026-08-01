@@ -94,15 +94,11 @@ form.addEventListener('submit', e => {
 });
 
 function loadTransactions() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch {
-    return [];
-  }
+  return loadJSON(STORAGE_KEY, []);
 }
 
 function saveTransactions() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+  saveJSON(STORAGE_KEY, transactions);
 }
 
 function todayISO() {

@@ -67,10 +67,10 @@ function savePriceCache() {
 }
 
 populateCryptoSelect();
-finnhubKeyInput.value = localStorage.getItem(FINNHUB_KEY_STORAGE) || '';
+finnhubKeyInput.value = loadJSON(FINNHUB_KEY_STORAGE, '');
 
 saveFinnhubKeyBtn.addEventListener('click', () => {
-  localStorage.setItem(FINNHUB_KEY_STORAGE, finnhubKeyInput.value.trim());
+  saveJSON(FINNHUB_KEY_STORAGE, finnhubKeyInput.value.trim());
   fetchStockPrices();
 });
 
@@ -286,7 +286,7 @@ async function fetchCryptoPrices() {
 
 async function fetchStockPrices() {
   if (stockHoldings.length === 0) return;
-  const apiKey = localStorage.getItem(FINNHUB_KEY_STORAGE);
+  const apiKey = loadJSON(FINNHUB_KEY_STORAGE, '');
   stockErrorEl.textContent = '';
   if (!apiKey) {
     stockErrorEl.textContent = 'Añade tu API key de Finnhub arriba para ver precios en vivo.';
