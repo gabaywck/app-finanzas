@@ -82,7 +82,7 @@ function monthsBetween(from, to) {
   return (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth()) - (to.getDate() < from.getDate() ? 1 : 0);
 }
 
-function buildGoalCard(goal, pace, today) {
+function buildGoalCard(goal, pace, today, compact = false) {
   const current = getGoalCurrentAmount(goal);
   const target = goal.targetAmount;
   const remaining = Math.max(target - current, 0);
@@ -137,11 +137,16 @@ function buildGoalCard(goal, pace, today) {
   const pctLabel = document.createElement('span');
   pctLabel.className = 'goal-pct';
   pctLabel.textContent = `${pct.toFixed(1)}%`;
-  const amountsLabel = document.createElement('span');
-  amountsLabel.className = 'goal-amounts';
-  amountsLabel.textContent = `${formatMoney(current)} de ${formatMoney(target)}`;
-  pctRow.append(pctLabel, amountsLabel);
+  pctRow.appendChild(pctLabel);
+  if (!compact) {
+    const amountsLabel = document.createElement('span');
+    amountsLabel.className = 'goal-amounts';
+    amountsLabel.textContent = `${formatMoney(current)} de ${formatMoney(target)}`;
+    pctRow.appendChild(amountsLabel);
+  }
   card.appendChild(pctRow);
+
+  if (compact) return card;
 
   const status = document.createElement('p');
   status.className = 'goal-status';
@@ -245,7 +250,7 @@ function renderPatrimonioGoals() {
   if (linked.length === 0) return;
   const pace = averageMonthlyNet();
   const today = new Date();
-  linked.forEach(goal => patrimonioGoalList.appendChild(buildGoalCard(goal, pace, today)));
+  linked.forEach(goal => patrimonioGoalList.appendChild(buildGoalCard(goal, pace, today, true)));
 }
 
 function refreshAllGoalViews() {
