@@ -138,7 +138,15 @@ function buildGoalCard(goal, pace, today, compact = false) {
   pctLabel.className = 'goal-pct';
   pctLabel.textContent = `${pct.toFixed(1)}%`;
   pctRow.appendChild(pctLabel);
-  if (!compact) {
+  if (compact) {
+    pctRow.classList.add('compact');
+    if (!achieved) {
+      const remainingLabel = document.createElement('span');
+      remainingLabel.className = 'goal-remaining';
+      remainingLabel.textContent = `-${formatMoney(remaining)}`;
+      pctRow.appendChild(remainingLabel);
+    }
+  } else {
     const amountsLabel = document.createElement('span');
     amountsLabel.className = 'goal-amounts';
     amountsLabel.textContent = `${formatMoney(current)} de ${formatMoney(target)}`;
