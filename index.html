@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mis Finanzas</title>
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div class="app">
@@ -17,6 +17,7 @@
     <button class="main-tab-btn active" data-panel="panel-movimientos">Movimientos</button>
     <button class="main-tab-btn" data-panel="panel-patrimonio">Patrimonio</button>
     <button class="main-tab-btn" data-panel="panel-informe">Informe</button>
+    <button class="main-tab-btn" data-panel="panel-objetivo">Objetivo</button>
   </nav>
 
   <div id="panel-movimientos" class="tab-panel active">
@@ -196,11 +197,34 @@
 
   </div>
 
+  <div id="panel-objetivo" class="tab-panel">
+
+    <section class="patrimonio-block">
+      <h3>🎯 Nuevo objetivo</h3>
+      <form id="goalForm" class="inline-form goal-form">
+        <input type="text" id="goalName" placeholder="Nombre (ej. Fondo de emergencia)" required>
+        <input type="number" id="goalTarget" placeholder="Importe objetivo €" step="0.01" min="0.01" required>
+        <input type="date" id="goalDate" aria-label="Fecha objetivo (opcional)">
+        <select id="goalSource">
+          <option value="manual">Actualizar importe manualmente</option>
+          <option value="bank">Vincular a una cuenta bancaria</option>
+          <option value="patrimonio">Vincular al patrimonio total</option>
+        </select>
+        <select id="goalBankAccount" class="goal-bank-select" style="display:none"></select>
+        <button type="submit">Crear objetivo</button>
+      </form>
+    </section>
+
+    <div id="goalList"></div>
+
+  </div>
+
 </div>
 
-<script src="shared.js?v=4"></script>
-<script src="app.js?v=4"></script>
-<script src="patrimonio.js?v=4"></script>
-<script src="informe.js?v=4"></script>
+<script src="shared.js?v=5"></script>
+<script src="app.js?v=5"></script>
+<script src="patrimonio.js?v=5"></script>
+<script src="informe.js?v=5"></script>
+<script src="objetivo.js?v=5"></script>
 </body>
 </html>
