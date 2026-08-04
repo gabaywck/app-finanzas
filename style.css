@@ -387,6 +387,13 @@ body {
   margin-top: 2px;
 }
 
+.tx-balance {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
 .tx-amount {
   font-weight: 600;
   font-size: 0.92rem;

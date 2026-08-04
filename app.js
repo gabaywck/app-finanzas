@@ -171,6 +171,30 @@ function isInViewMonth(iso) {
   return d.getFullYear() === viewDate.getFullYear() && d.getMonth() === viewDate.getMonth();
 }
 
+function computeRunningBalances() {
+  const balanceAfter = {};
+  const byAccount = {};
+  transactions.forEach(t => {
+    if (!t.accountId) return;
+    (byAccount[t.accountId] = byAccount[t.accountId] || []).push(t);
+  });
+  Object.keys(byAccount).forEach(accountId => {
+    const acc = bankAccounts.find(a => a.id === accountId);
+    if (!acc) return;
+    const accTx = byAccount[accountId];
+    const totalDelta = accTx.reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0);
+    let running = acc.balance - totalDelta;
+    accTx
+      .slice()
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .forEach(t => {
+        running += t.type === 'income' ? t.amount : -t.amount;
+        balanceAfter[t.id] = running;
+      });
+  });
+  return balanceAfter;
+}
+
 function render() {
   currentMonthLabel.textContent = viewDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
 
@@ -195,9 +219,12 @@ function render() {
   txList.innerHTML = '';
   emptyState.style.display = filtered.length === 0 ? 'block' : 'none';
 
+  const balances = computeRunningBalances();
+
   filtered.forEach(tx => {
     const cat = findCategory(tx.category);
     const accName = getAccountName(tx.accountId);
+    const balanceAfter = balances[tx.id];
     const li = document.createElement('li');
     li.className = `tx-item ${tx.type}`;
     li.innerHTML = `
@@ -205,6 +232,7 @@ function render() {
       <div class="tx-info">
         <div class="tx-desc">${escapeHtml(tx.description)}</div>
         <div class="tx-meta">${cat.label} · ${formatDate(tx.date)}${accName ? ' · ' + escapeHtml(accName) : ''}</div>
+        ${balanceAfter !== undefined ? `<div class="tx-balance">Saldo en cuenta: ${formatMoney(balanceAfter)}</div>` : ''}
       </div>
       <div class="tx-amount">${tx.type === 'income' ? '+' : '-'}${formatMoney(tx.amount)}</div>
       <button class="tx-delete" data-id="${tx.id}" aria-label="Eliminar">✕</button>
