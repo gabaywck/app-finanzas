@@ -214,7 +214,7 @@ function render() {
   if (filterType.value !== 'all') {
     filtered = filtered.filter(t => t.type === filterType.value);
   }
-  filtered = filtered.slice().sort((a, b) => b.date.localeCompare(a.date));
+  filtered = filtered.slice().reverse().sort((a, b) => b.date.localeCompare(a.date));
 
   txList.innerHTML = '';
   emptyState.style.display = filtered.length === 0 ? 'block' : 'none';
