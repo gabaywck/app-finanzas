@@ -19,6 +19,7 @@ const CATEGORIES = {
     { id: 'salud', label: 'Salud', icon: '💊' },
     { id: 'compras', label: 'Compras', icon: '🛍️' },
     { id: 'facturas', label: 'Facturas', icon: '🧾' },
+    { id: 'inversion', label: 'Inversión', icon: '📈' },
     { id: 'otros', label: 'Otros', icon: '📦' },
   ],
   income: [
@@ -26,6 +27,7 @@ const CATEGORIES = {
     { id: 'freelance', label: 'Freelance', icon: '💻' },
     { id: 'ventas', label: 'Ventas', icon: '🏷️' },
     { id: 'regalo', label: 'Regalo', icon: '🎁' },
+    { id: 'inversion_ing', label: 'Inversión', icon: '📈' },
     { id: 'otros_ing', label: 'Otros', icon: '📦' },
   ],
 };
