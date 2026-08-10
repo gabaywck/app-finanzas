@@ -11,7 +11,7 @@ const LEGACY_KEYS = [
   'finanzas.goals',
 ];
 const SCRIPT_SEQUENCE = ['shared.js', 'app.js', 'patrimonio.js', 'informe.js', 'objetivo.js'];
-const ASSET_VERSION = '16';
+const ASSET_VERSION = '17';
 
 let VAULT = {};
 let vaultKey = null;

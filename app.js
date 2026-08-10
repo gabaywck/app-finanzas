@@ -195,13 +195,18 @@ function computeRunningBalances() {
   return balanceAfter;
 }
 
+function isTransfer(t) {
+  return t.description.toLowerCase().includes('transpaso');
+}
+
 function render() {
   currentMonthLabel.textContent = viewDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
 
   const monthTx = transactions.filter(t => isInViewMonth(t.date));
+  const cashflowTx = monthTx.filter(t => !isTransfer(t));
 
-  const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+  const income = cashflowTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const expense = cashflowTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
   document.getElementById('totalIncome').textContent = formatMoney(income);
   document.getElementById('totalExpense').textContent = formatMoney(expense);
