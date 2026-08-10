@@ -149,13 +149,7 @@
 
     <section class="patrimonio-block">
       <h3>📈 Stocks / ETFs</h3>
-      <div class="api-key-box">
-        <p>Precios en vivo vía <a href="https://finnhub.io/register" target="_blank" rel="noopener">Finnhub</a> (API key gratuita, se guarda solo en tu navegador).</p>
-        <div class="inline-form">
-          <input type="text" id="finnhubKeyInput" placeholder="Tu API key de Finnhub">
-          <button id="saveFinnhubKey" type="button">Guardar</button>
-        </div>
-      </div>
+      <p class="block-note">Precios en vivo vía Yahoo Finance. Usa el ticker de la bolsa donde cotiza (ej. <code>AAPL</code> para EEUU, <code>CSPX.L</code> para Londres, <code>SXR8.DE</code> para Xetra).</p>
       <ul id="stockList" class="asset-list"></ul>
       <form id="stockForm" class="inline-form">
         <input type="text" id="stockTicker" placeholder="Ticker (ej. AAPL)" required>

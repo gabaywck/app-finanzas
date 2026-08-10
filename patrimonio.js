@@ -1,6 +1,5 @@
 const CRYPTO_KEY = 'finanzas.crypto';
 const STOCK_KEY = 'finanzas.stocks';
-const FINNHUB_KEY_STORAGE = 'finanzas.finnhubKey';
 const PRICE_CACHE_KEY = 'finanzas.priceCache';
 
 const CRYPTO_OPTIONS = [
@@ -55,8 +54,6 @@ const stockList = document.getElementById('stockList');
 const stockForm = document.getElementById('stockForm');
 const stockTotalEl = document.getElementById('stockTotal');
 const stockErrorEl = document.getElementById('stockError');
-const finnhubKeyInput = document.getElementById('finnhubKeyInput');
-const saveFinnhubKeyBtn = document.getElementById('saveFinnhubKey');
 
 const patrimonioTotalEl = document.getElementById('patrimonioTotal');
 const patrimonioUpdatedEl = document.getElementById('patrimonioUpdated');
@@ -67,12 +64,6 @@ function savePriceCache() {
 }
 
 populateCryptoSelect();
-finnhubKeyInput.value = loadJSON(FINNHUB_KEY_STORAGE, '');
-
-saveFinnhubKeyBtn.addEventListener('click', () => {
-  saveJSON(FINNHUB_KEY_STORAGE, finnhubKeyInput.value.trim());
-  fetchStockPrices();
-});
 
 bankForm.addEventListener('submit', e => {
   e.preventDefault();
@@ -205,17 +196,18 @@ function renderCrypto() {
 function renderStocks() {
   stockList.innerHTML = '';
   stockHoldings.forEach(h => {
-    const priceUsd = priceCache.stocks[h.ticker];
-    const value = priceUsd !== undefined ? priceUsd * h.quantity : null;
+    const entry = priceCache.stocks[h.ticker];
+    const symbol = entry ? (entry.currency === 'EUR' ? '€' : entry.currency === 'USD' ? '$' : entry.currency) : '';
+    const value = entry ? entry.price * h.quantity : null;
     const li = document.createElement('li');
     li.className = 'asset-item';
     li.innerHTML = `
       <div class="asset-icon">📈</div>
       <div class="asset-info">
         <div class="asset-name">${h.ticker} <span class="asset-qty">${h.quantity}</span></div>
-        <div class="asset-meta">${priceUsd !== undefined ? formatCurrency(priceUsd, '$') + ' / unidad' : 'precio no disponible'}</div>
+        <div class="asset-meta">${entry ? formatCurrency(entry.price, symbol) + ' / unidad' : 'precio no disponible'}</div>
       </div>
-      <div class="asset-value">${formatCurrency(value, '$')}</div>
+      <div class="asset-value">${entry ? formatCurrency(value, symbol) : '—'}</div>
       <button class="tx-delete" data-id="${h.id}" aria-label="Eliminar">✕</button>
     `;
     stockList.appendChild(li);
@@ -227,11 +219,11 @@ function renderStocks() {
       renderStocks();
     });
   });
-  const totalUsd = stockHoldings.reduce((s, h) => {
-    const price = priceCache.stocks[h.ticker];
-    return s + (price !== undefined ? price * h.quantity : 0);
+  const totalEur = stockHoldings.reduce((s, h) => {
+    const eur = eurValue(priceCache.stocks[h.ticker]);
+    return s + (eur !== null ? eur * h.quantity : 0);
   }, 0);
-  stockTotalEl.textContent = formatCurrency(totalUsd, '$');
+  stockTotalEl.textContent = formatCurrency(totalEur, '€');
   renderTotalPatrimonio();
 }
 
@@ -241,11 +233,10 @@ function getPatrimonioTotal() {
     const price = priceCache.crypto[h.coinId];
     return s + (price !== undefined ? price * h.quantity : 0);
   }, 0);
-  const stockTotalUsd = stockHoldings.reduce((s, h) => {
-    const price = priceCache.stocks[h.ticker];
-    return s + (price !== undefined ? price * h.quantity : 0);
+  const stockTotalEur = stockHoldings.reduce((s, h) => {
+    const eur = eurValue(priceCache.stocks[h.ticker]);
+    return s + (eur !== null ? eur * h.quantity : 0);
   }, 0);
-  const stockTotalEur = priceCache.usdToEur ? stockTotalUsd * priceCache.usdToEur : 0;
   return bankTotal + cryptoTotal + stockTotalEur;
 }
 
@@ -284,21 +275,25 @@ async function fetchCryptoPrices() {
   }
 }
 
+function eurValue(priceEntry) {
+  if (!priceEntry) return null;
+  if (priceEntry.currency === 'EUR') return priceEntry.price;
+  if (priceEntry.currency === 'USD') return priceCache.usdToEur ? priceEntry.price * priceCache.usdToEur : null;
+  return null;
+}
+
 async function fetchStockPrices() {
   if (stockHoldings.length === 0) return;
-  const apiKey = loadJSON(FINNHUB_KEY_STORAGE, '');
   stockErrorEl.textContent = '';
-  if (!apiKey) {
-    stockErrorEl.textContent = 'Añade tu API key de Finnhub arriba para ver precios en vivo.';
-    return;
-  }
   try {
     const tickers = [...new Set(stockHoldings.map(h => h.ticker))];
+    let anyUnsupportedCurrency = false;
     for (const ticker of tickers) {
-      const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(ticker)}&token=${apiKey}`);
-      if (!res.ok) throw new Error('Respuesta no válida de Finnhub');
+      const res = await fetch(`/api/quote?symbol=${encodeURIComponent(ticker)}`);
       const data = await res.json();
-      if (data.c) priceCache.stocks[ticker] = data.c;
+      if (!res.ok || typeof data.price !== 'number') continue;
+      priceCache.stocks[ticker] = { price: data.price, currency: data.currency };
+      if (data.currency !== 'EUR' && data.currency !== 'USD') anyUnsupportedCurrency = true;
     }
     const fx = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR');
     if (fx.ok) {
@@ -309,8 +304,11 @@ async function fetchStockPrices() {
     savePriceCache();
     renderStocks();
     document.dispatchEvent(new CustomEvent('prices-updated'));
+    if (anyUnsupportedCurrency) {
+      stockErrorEl.textContent = 'Alguno de tus tickers cotiza en una divisa no soportada (solo EUR/USD) y no entra en el total.';
+    }
   } catch (err) {
-    stockErrorEl.textContent = 'No se pudieron actualizar los precios de stocks ahora mismo (revisa tu API key).';
+    stockErrorEl.textContent = 'No se pudieron actualizar los precios de stocks ahora mismo.';
   }
 }
 
