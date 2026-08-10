@@ -295,10 +295,14 @@ async function fetchStockPrices() {
       priceCache.stocks[ticker] = { price: data.price, currency: data.currency };
       if (data.currency !== 'EUR' && data.currency !== 'USD') anyUnsupportedCurrency = true;
     }
-    const fx = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR');
-    if (fx.ok) {
-      const fxData = await fx.json();
-      priceCache.usdToEur = fxData.rates.EUR;
+    try {
+      const fx = await fetch('https://api.frankfurter.dev/v1/latest?from=USD&to=EUR');
+      if (fx.ok) {
+        const fxData = await fx.json();
+        priceCache.usdToEur = fxData.rates.EUR;
+      }
+    } catch (fxErr) {
+      // El tipo de cambio es opcional para el total; los precios ya obtenidos se guardan igual.
     }
     priceCache.updatedAt = new Date().toISOString();
     savePriceCache();
