@@ -85,7 +85,7 @@ body {
 }
 
 .app {
-  max-width: 1200px;
+  max-width: 480px;
   margin: 0 auto;
   padding: 20px 16px 60px;
 }
@@ -647,26 +647,12 @@ body {
   color: var(--text-dim);
 }
 
-.donut-row {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  -webkit-overflow-scrolling: touch;
-}
-
 .donut-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
   margin-bottom: 16px;
-}
-
-.donut-row .donut-card {
-  flex: 1 1 380px;
-  min-width: 380px;
-  margin-bottom: 0;
 }
 
 .donut-title {
