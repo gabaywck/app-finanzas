@@ -187,7 +187,7 @@ body {
 
 .summary {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin-bottom: 20px;
 }
@@ -647,12 +647,25 @@ body {
   color: var(--text-dim);
 }
 
+.donut-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
 .donut-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
   margin-bottom: 16px;
+}
+
+.donut-row .donut-card {
+  flex: 0 0 260px;
+  margin-bottom: 0;
 }
 
 .donut-title {
