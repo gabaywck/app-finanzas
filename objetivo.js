@@ -72,7 +72,7 @@ function averageMonthlyNet() {
   const cutoff = new Date(today);
   cutoff.setDate(cutoff.getDate() - 90);
   const cutoffISO = cutoff.toISOString().slice(0, 10);
-  const recent = transactions.filter(t => t.date >= cutoffISO);
+  const recent = transactions.filter(t => t.date >= cutoffISO && !isTransfer(t));
   if (recent.length === 0) return null;
   const net = recent.reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0);
   return net / 3;

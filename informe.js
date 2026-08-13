@@ -80,11 +80,10 @@ function patrimonioComposition() {
     const p = priceCache.crypto[h.coinId];
     return s + (p !== undefined ? p * h.quantity : 0);
   }, 0);
-  const stockTotalUsd = stockHoldings.reduce((s, h) => {
-    const p = priceCache.stocks[h.ticker];
-    return s + (p !== undefined ? p * h.quantity : 0);
+  const stockTotalEur = stockHoldings.reduce((s, h) => {
+    const eur = eurValue(priceCache.stocks[h.ticker]);
+    return s + (eur !== null ? eur * h.quantity : 0);
   }, 0);
-  const stockTotalEur = priceCache.usdToEur ? stockTotalUsd * priceCache.usdToEur : 0;
 
   return [
     { label: 'Cuentas bancarias', icon: '🏦', amount: bankTotal },
@@ -254,7 +253,7 @@ function buildLegend(entries, total, segmentEls) {
 function renderReport() {
   const fromVal = reportFromInput.value || '0001-01-01';
   const toVal = reportToInput.value || '9999-12-31';
-  const rangeTx = transactions.filter(t => t.date >= fromVal && t.date <= toVal);
+  const rangeTx = transactions.filter(t => t.date >= fromVal && t.date <= toVal && !isTransfer(t));
 
   const income = rangeTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const expense = rangeTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
