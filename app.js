@@ -196,7 +196,8 @@ function computeRunningBalances() {
 }
 
 function isTransfer(t) {
-  return t.description.toLowerCase().includes('traspaso');
+  const desc = t.description.toLowerCase();
+  return desc.includes('traspaso') || desc.includes('transpaso');
 }
 
 function render() {
