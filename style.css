@@ -85,7 +85,7 @@ body {
 }
 
 .app {
-  max-width: 480px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px 16px 60px;
 }
@@ -664,7 +664,8 @@ body {
 }
 
 .donut-row .donut-card {
-  flex: 0 0 260px;
+  flex: 1 1 380px;
+  min-width: 380px;
   margin-bottom: 0;
 }
 
