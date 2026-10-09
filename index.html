@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mis Finanzas</title>
-<link rel="stylesheet" href="style.css?v=15">
+<link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
 
@@ -149,16 +149,16 @@
     </section>
 
     <section class="patrimonio-block">
-      <h3>📈 Stocks / ETFs</h3>
-      <p class="block-note">Precios en vivo vía Yahoo Finance. Usa el ticker de la bolsa donde cotiza (ej. <code>AAPL</code> para EEUU, <code>CSPX.L</code> para Londres, <code>SXR8.DE</code> para Xetra).</p>
-      <ul id="stockList" class="asset-list"></ul>
-      <form id="stockForm" class="inline-form">
-        <input type="text" id="stockTicker" placeholder="Ticker (ej. AAPL)" required>
-        <input type="number" id="stockQty" placeholder="Cantidad" step="any" min="0" required>
+      <h3>📊 Fondos indexados · Finizens</h3>
+      <p class="block-note">Finizens no ofrece precios públicos: actualiza el valor de cada cartera con lo que veas en su app (botón ✎).</p>
+      <ul id="fundList" class="asset-list"></ul>
+      <form id="fundForm" class="inline-form">
+        <input type="text" id="fundName" placeholder="Nombre (ej. Cartera 4)" required>
+        <input type="number" id="fundInvested" placeholder="Aportado €" step="0.01" min="0" required>
+        <input type="number" id="fundValue" placeholder="Valor actual €" step="0.01" min="0" required>
         <button type="submit">Añadir</button>
       </form>
-      <div class="block-total">Subtotal: <span id="stockTotal">0,00 €</span></div>
-      <p class="block-note" id="stockError"></p>
+      <div class="block-total">Subtotal: <span id="fundTotal">0,00 €</span></div>
     </section>
 
   </div>
@@ -253,6 +253,6 @@
 
 </div>
 
-<script src="lock.js?v=18"></script>
+<script src="lock.js?v=19"></script>
 </body>
 </html>

@@ -80,15 +80,11 @@ function patrimonioComposition() {
     const p = priceCache.crypto[h.coinId];
     return s + (p !== undefined ? p * h.quantity : 0);
   }, 0);
-  const stockTotalEur = stockHoldings.reduce((s, h) => {
-    const eur = eurValue(priceCache.stocks[h.ticker]);
-    return s + (eur !== null ? eur * h.quantity : 0);
-  }, 0);
 
   return [
     { label: 'Cuentas bancarias', icon: '🏦', amount: bankTotal },
     { label: 'Crypto', icon: '🪙', amount: cryptoTotal },
-    { label: 'Stocks/ETFs', icon: '📈', amount: stockTotalEur },
+    { label: 'Fondos Finizens', icon: '📊', amount: getFundsTotal() },
   ].filter(e => e.amount > 0);
 }
 

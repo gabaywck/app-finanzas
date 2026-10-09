@@ -980,3 +980,20 @@ body {
 
 .evo-detail-row .income-text { color: var(--income); }
 .evo-detail-row .expense-text { color: var(--expense); }
+
+/* Fondos Finizens */
+.tx-edit {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 4px;
+}
+
+.tx-edit:hover {
+  color: var(--text);
+}
+
+.gain-pos { color: var(--income); }
+.gain-neg { color: var(--expense); }

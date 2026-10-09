@@ -226,7 +226,7 @@ function buildGoalCard(goal, pace, today, compact = false) {
   } else if (goal.source === 'patrimonio') {
     const srcP = document.createElement('p');
     srcP.className = 'goal-source-note';
-    srcP.textContent = 'Vinculado al patrimonio total (cuentas + crypto + stocks).';
+    srcP.textContent = 'Vinculado al patrimonio total (cuentas + crypto + fondos).';
     card.appendChild(srcP);
   }
 
