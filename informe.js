@@ -250,6 +250,117 @@ function buildLegend(entries, total, segmentEls) {
   return list;
 }
 
+function monthlySeries(count) {
+  const today = new Date();
+  const months = [];
+  for (let i = count - 1; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    months.push({ key, date: d, income: 0, expense: 0 });
+  }
+  const byKey = new Map(months.map(m => [m.key, m]));
+  transactions.forEach(t => {
+    if (isTransfer(t)) return;
+    const m = byKey.get(t.date.slice(0, 7));
+    if (!m) return;
+    if (t.type === 'income') m.income += t.amount;
+    else m.expense += t.amount;
+  });
+  const firstWithData = months.findIndex(m => m.income > 0 || m.expense > 0);
+  return firstWithData === -1 ? [] : months.slice(firstWithData);
+}
+
+function renderMonthlyEvolution(container) {
+  container.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'donut-card';
+
+  const h4 = document.createElement('h4');
+  h4.className = 'donut-title';
+  h4.textContent = 'Evolución mensual';
+  card.appendChild(h4);
+
+  const note = document.createElement('p');
+  note.className = 'donut-note';
+  note.textContent = 'Últimos 12 meses — no depende del rango de fechas seleccionado.';
+  card.appendChild(note);
+
+  const series = monthlySeries(12);
+  if (series.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'donut-empty';
+    empty.textContent = 'Sin movimientos todavía.';
+    card.appendChild(empty);
+    container.appendChild(card);
+    return;
+  }
+
+  const max = Math.max(...series.map(m => Math.max(m.income, m.expense)), 1);
+
+  const legend = document.createElement('div');
+  legend.className = 'evo-legend';
+  legend.innerHTML = '<span><i class="evo-dot income"></i>Ingresos</span><span><i class="evo-dot expense"></i>Gastos</span>';
+  card.appendChild(legend);
+
+  const chart = document.createElement('div');
+  chart.className = 'evo-chart';
+  const scaleLabel = document.createElement('span');
+  scaleLabel.className = 'evo-scale';
+  scaleLabel.textContent = formatMoney(max);
+  chart.appendChild(scaleLabel);
+
+  const detail = document.createElement('div');
+  detail.className = 'evo-detail';
+
+  const columns = [];
+  const select = (m, col) => {
+    columns.forEach(c => c.classList.remove('active'));
+    col.classList.add('active');
+    const net = m.income - m.expense;
+    const monthName = m.date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    detail.innerHTML = `
+      <div class="evo-detail-month">${monthName}</div>
+      <div class="evo-detail-row"><span>Ingresos</span><span class="income-text">${formatMoney(m.income)}</span></div>
+      <div class="evo-detail-row"><span>Gastos</span><span class="expense-text">${formatMoney(m.expense)}</span></div>
+      <div class="evo-detail-row"><span>Balance</span><span class="${net >= 0 ? 'income-text' : 'expense-text'}">${net >= 0 ? '+' : ''}${formatMoney(net)}</span></div>
+      ${m.income > 0 ? `<div class="evo-detail-row"><span>Tasa de ahorro</span><span>${((net / m.income) * 100).toFixed(0)}%</span></div>` : ''}
+    `;
+  };
+
+  series.forEach(m => {
+    const col = document.createElement('button');
+    col.type = 'button';
+    col.className = 'evo-col';
+    col.setAttribute('aria-label', `${m.date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}: ingresos ${formatMoney(m.income)}, gastos ${formatMoney(m.expense)}`);
+
+    const bars = document.createElement('div');
+    bars.className = 'evo-bars';
+    const inc = document.createElement('div');
+    inc.className = 'evo-bar income';
+    inc.style.height = `${(m.income / max) * 100}%`;
+    const exp = document.createElement('div');
+    exp.className = 'evo-bar expense';
+    exp.style.height = `${(m.expense / max) * 100}%`;
+    bars.append(inc, exp);
+
+    const label = document.createElement('span');
+    label.className = 'evo-label';
+    label.textContent = m.date.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
+
+    col.append(bars, label);
+    col.addEventListener('click', () => select(m, col));
+    col.addEventListener('mouseenter', () => select(m, col));
+    columns.push(col);
+    chart.appendChild(col);
+  });
+
+  card.appendChild(chart);
+  card.appendChild(detail);
+  container.appendChild(card);
+
+  select(series[series.length - 1], columns[columns.length - 1]);
+}
+
 function renderReport() {
   const fromVal = reportFromInput.value || '0001-01-01';
   const toVal = reportToInput.value || '9999-12-31';
@@ -262,7 +373,8 @@ function renderReport() {
   document.getElementById('reportExpense').textContent = formatMoney(expense);
   document.getElementById('reportBalance').textContent = formatMoney(income - expense);
 
-  renderDonut(document.getElementById('donutExpense'), 'Gastos por categoría', categoryBreakdown(rangeTx, 'expense'));
+  renderMonthlyEvolution(document.getElementById('evolutionChart'));
+  renderDonut(document.getElementById('donutExpense'),'Gastos por categoría', categoryBreakdown(rangeTx, 'expense'));
   renderDonut(document.getElementById('donutIncome'), 'Ingresos por categoría', categoryBreakdown(rangeTx, 'income'));
   renderDonut(document.getElementById('donutPatrimonio'), 'Composición del patrimonio', patrimonioComposition(), {
     note: 'Valor actual — no depende del rango de fechas seleccionado.',

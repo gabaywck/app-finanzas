@@ -8,6 +8,7 @@
   --income: #34d399;
   --expense: #f87171;
   --accent: #6366f1;
+  --warn: #fbbf24;
   --radius: 14px;
 }
 
@@ -104,6 +105,8 @@ body {
 
 .main-tabs {
   display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -112,7 +115,8 @@ body {
 }
 
 .main-tab-btn {
-  flex: 1;
+  flex: 1 0 auto;
+  white-space: nowrap;
   border: none;
   background: transparent;
   color: var(--text-dim);
@@ -836,3 +840,143 @@ body {
 .goal-update-form {
   margin-top: 10px;
 }
+
+/* Presupuestos */
+.budget-total {
+  border-color: var(--accent);
+}
+
+.budget-track {
+  position: relative;
+  overflow: visible;
+}
+
+.budget-track .goal-meter-fill {
+  overflow: hidden;
+}
+
+.budget-pace-marker {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--text);
+  opacity: 0.6;
+  border-radius: 1px;
+  transform: translateX(-1px);
+}
+
+/* Evolución mensual */
+.evo-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.evo-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.evo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.evo-dot.income, .evo-bar.income { background: var(--income); }
+.evo-dot.expense, .evo-bar.expense { background: var(--expense); }
+
+.evo-chart {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  height: 170px;
+  padding-top: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.evo-scale {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.evo-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 0 1px;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-family: inherit;
+}
+
+.evo-col:hover,
+.evo-col.active {
+  background: var(--surface-2);
+}
+
+.evo-col.active .evo-label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.evo-bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+}
+
+.evo-bar {
+  width: 42%;
+  max-width: 14px;
+  min-height: 1px;
+  border-radius: 3px 3px 0 0;
+}
+
+.evo-label {
+  font-size: 0.62rem;
+  text-align: center;
+  padding: 4px 0 2px;
+  text-transform: capitalize;
+}
+
+.evo-detail {
+  margin-top: 12px;
+  font-size: 0.82rem;
+}
+
+.evo-detail-month {
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: capitalize;
+}
+
+.evo-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  color: var(--text-dim);
+}
+
+.evo-detail-row span:last-child {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.evo-detail-row .income-text { color: var(--income); }
+.evo-detail-row .expense-text { color: var(--expense); }

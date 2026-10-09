@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mis Finanzas</title>
-<link rel="stylesheet" href="style.css?v=14">
+<link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 
@@ -29,6 +29,7 @@
     <button class="main-tab-btn active" data-panel="panel-movimientos">Movimientos</button>
     <button class="main-tab-btn" data-panel="panel-patrimonio">Patrimonio</button>
     <button class="main-tab-btn" data-panel="panel-informe">Informe</button>
+    <button class="main-tab-btn" data-panel="panel-presupuestos">Presupuestos</button>
     <button class="main-tab-btn" data-panel="panel-objetivo">Objetivo</button>
   </nav>
 
@@ -199,9 +200,32 @@
       </div>
     </section>
 
+    <div id="evolutionChart"></div>
     <div id="donutExpense"></div>
     <div id="donutIncome"></div>
     <div id="donutPatrimonio"></div>
+
+  </div>
+
+  <div id="panel-presupuestos" class="tab-panel">
+
+    <div class="month-nav">
+      <button id="budgetPrevMonth" class="icon-btn" aria-label="Mes anterior">‹</button>
+      <span id="budgetMonthLabel"></span>
+      <button id="budgetNextMonth" class="icon-btn" aria-label="Mes siguiente">›</button>
+    </div>
+
+    <section class="patrimonio-block">
+      <h3>💰 Presupuesto mensual por categoría</h3>
+      <form id="budgetForm" class="inline-form">
+        <select id="budgetCategory" required></select>
+        <input type="number" id="budgetAmount" placeholder="Límite al mes €" step="0.01" min="0.01" required>
+        <button type="submit">Guardar</button>
+      </form>
+      <p class="block-note">Se aplica a todos los meses. Si eliges una categoría que ya tiene presupuesto, lo actualiza.</p>
+    </section>
+
+    <div id="budgetList"></div>
 
   </div>
 
@@ -229,6 +253,6 @@
 
 </div>
 
-<script src="lock.js?v=17"></script>
+<script src="lock.js?v=18"></script>
 </body>
 </html>
